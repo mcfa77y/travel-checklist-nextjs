@@ -13,6 +13,7 @@ datasource db {
 model Item {
   id     String  @id @default(uuid())
   name   String
+  code   String  @unique
   List   List?   @relation(fields: [listId], references: [id])
   listId String?
 }
@@ -20,6 +21,7 @@ model Item {
 model List {
   id               String  @id @default(uuid())
   name             String?
+  code             String  @unique
   items            Item[]
   children         List[]  @relation("children")
   childrenRelation List[]  @relation("children")
