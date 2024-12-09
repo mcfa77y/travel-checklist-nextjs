@@ -52,6 +52,13 @@ function CheckList(props: Props) {
     setActiveItemUpdateId(undefined);
     triggerItemUpdate({ ...data });
   };
+
+  const onCancelItemSubmit = (data: any) => {
+    console.log(data);
+    reset();
+    resetItem();
+    setActiveItemUpdateId(undefined);
+  };
   const onDeleteItemSubmit = (data: any) => {
     console.log(data);
     reset();
@@ -67,12 +74,22 @@ function CheckList(props: Props) {
         {items
           .sort((a, b) => a.name.localeCompare(b.name))
           ?.map((item: Item) => (
-            <li key={item.id}>
-              <Checkbox id={item.id} className="m-2" />
-              <span
-                onClick={(e) => {
-                  setActiveItemUpdateId(item.id);
+            <li key={item.id} className="flex items-center">
+              <Checkbox
+                id={item.id}
+                className="m-2"
+                onChange={(e) => {
+                  setActiveItemUpdateId(e.target.checked ? item.id : undefined);
                   setValueItem("name", item.name);
+                }}
+              />
+              <span
+                className="flex-1 truncate"
+                onMouseEnter={(e) => {
+                  setActiveItemUpdateId(item.id);
+                }}
+                onMouseLeave={(e) => {
+                  setActiveItemUpdateId(undefined);
                 }}
               >
                 {item.name}
@@ -97,11 +114,12 @@ function CheckList(props: Props) {
                     defaultValue={item.id}
                     type="hidden"
                   />
-                  <input
+                  <button
                     type="submit"
-                    value="+"
                     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                  ></input>
+                  >
+                    update
+                  </button>
                   {/* create a red button to delete an item */}
                   <button
                     type="button"
@@ -110,7 +128,16 @@ function CheckList(props: Props) {
                       onDeleteItemSubmit({ itemId: item.id });
                     }}
                   >
-                    x
+                    delete
+                  </button>
+                  <button
+                    type="button"
+                    className="text-whitefocus:ring-4 bg-slate-100 hover:bg-slate-200 focus:ring-slate-300 dark:bg-slate-700 dark:hover:bg-slate-800 dark:focus:ring-slate-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                    onClick={(e) => {
+                      onCancelItemSubmit({ itemId: item.id });
+                    }}
+                  >
+                    cancel
                   </button>
                 </form>
               )}
@@ -127,7 +154,7 @@ function CheckList(props: Props) {
             />
             <input
               type="submit"
-              value="+"
+              value="add new item"
               className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
             ></input>
           </form>

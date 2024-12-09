@@ -5,9 +5,9 @@ import { Item, List } from "@prisma/client";
 import { LayoutDashboardIcon, MenuIcon } from "lucide-react";
 import { useState } from "react";
 import useSWR from "swr";
-import CheckList from "./checkList";
+import CheckList from "./check-list";
 import { fetcher } from "./shared";
-import { SidebarContent } from "./sidebarConent";
+import { SidebarContent } from "./sidebar-conent";
 
 export interface NavItem {
   id: string;
