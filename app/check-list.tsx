@@ -1,6 +1,13 @@
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Item, List } from "@prisma/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import useSWRMutation from "swr/mutation";
 interface Props {
@@ -11,7 +18,7 @@ interface Props {
 export interface CheckListFormInput {
   name: string;
   itemId?: string;
-  listId: string;
+  listId: string | null;
 }
 async function updateItem(url: string, { arg }: { arg: CheckListFormInput }) {
   await fetch(url, {
@@ -30,43 +37,42 @@ function CheckList(props: Props) {
   const [activeItemUpdateId, setActiveItemUpdateId] = useState<
     string | undefined
   >(undefined);
-  const { register, handleSubmit, reset, watch } = useForm<CheckListFormInput>({
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [activeItem, setActiveItem] = useState<Item | undefined>(undefined);
+  const [open, setOpen] = useState(false);
+
+  const { register, handleSubmit, reset } = useForm<CheckListFormInput>({
     defaultValues: { name: "", listId: list.id },
   });
 
-  const {
-    register: registerItem,
-    handleSubmit: handleSubmitItem,
-    reset: resetItem,
-    watch: watchItem,
-    setValue: setValueItem,
-  } = useForm<CheckListFormInput>({
-    defaultValues: { name: "", listId: list.id, itemId: activeItemUpdateId },
-  });
   const { trigger: triggerItemUpdate } = useSWRMutation("/api", updateItem);
   const { trigger: triggerItemDelete } = useSWRMutation("/api", deleteItem);
+  useEffect(() => {
+    if (activeItemUpdateId) {
+      const item = items.find((item) => item.id === activeItemUpdateId);
+      if (item) {
+        setActiveItem(item);
+      }
+    }
+  }, [activeItemUpdateId, items]);
   const onUpdateItemSubmit: SubmitHandler<CheckListFormInput> = (data) => {
     console.log(data);
     reset();
-    resetItem();
-    setActiveItemUpdateId(undefined);
     triggerItemUpdate({ ...data });
+    setOpen(false);
+  };
+  const onCancelItemSubmit = () => {
+    reset();
+    setOpen(false);
   };
 
-  const onCancelItemSubmit = (data: any) => {
+  const onDeleteItemSubmit: SubmitHandler<CheckListFormInput> = (data) => {
     console.log(data);
     reset();
-    resetItem();
-    setActiveItemUpdateId(undefined);
-  };
-  const onDeleteItemSubmit = (data: any) => {
-    console.log(data);
-    reset();
-    resetItem();
-    setActiveItemUpdateId(undefined);
     triggerItemDelete({ ...data });
+    setOpen(false);
   };
-  console.log(watchItem("name"));
+
   return (
     <>
       <h2 className="m-2 text-xl underline-offset-3 underline ">{list.name}</h2>
@@ -75,92 +81,121 @@ function CheckList(props: Props) {
           .sort((a, b) => a.name.localeCompare(b.name))
           ?.map((item: Item) => (
             <li key={item.id} className="flex items-center">
-              <Checkbox
-                id={item.id}
-                className="m-2"
-                onChange={(e) => {
-                  setActiveItemUpdateId(e.target.checked ? item.id : undefined);
-                  setValueItem("name", item.name);
-                }}
-              />
+              <Checkbox id={item.id} className="m-2" />
+
               <span
                 className="flex-1 truncate"
-                onMouseEnter={(e) => {
-                  setActiveItemUpdateId(item.id);
-                }}
-                onMouseLeave={(e) => {
-                  setActiveItemUpdateId(undefined);
-                }}
+                onMouseEnter={() => setActiveItemUpdateId(item.id)}
               >
                 {item.name}
               </span>
               {item.id === activeItemUpdateId && (
-                <form
-                  onSubmit={handleSubmitItem(onUpdateItemSubmit)}
-                  className="flex flex-row gap-2"
-                >
-                  <input
-                    type="text"
-                    {...registerItem("name")}
-                    defaultValue={item.name}
-                  />
-                  <input
-                    {...registerItem("listId")}
-                    value={list.id}
-                    type="hidden"
-                  />
-                  <input
-                    {...registerItem("itemId")}
-                    defaultValue={item.id}
-                    type="hidden"
-                  />
+                <div>
                   <button
-                    type="submit"
-                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                    onClick={() => setOpen(true)}
+                    className="text-black bg-slate-100 hover:bg-slate-200 focus:ring-slate-300 dark:bg-slate-700 dark:hover:bg-slate-800 dark:focus:ring-slate-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center self-end"
                   >
-                    update
+                    edit
                   </button>
-                  {/* create a red button to delete an item */}
                   <button
                     type="button"
                     className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
-                    onClick={(e) => {
-                      onDeleteItemSubmit({ itemId: item.id });
+                    onClick={() => {
+                      triggerItemDelete({
+                        name: item.name,
+                        listId: list.id,
+                        itemId: item.id,
+                      });
                     }}
                   >
                     delete
                   </button>
-                  <button
-                    type="button"
-                    className="text-whitefocus:ring-4 bg-slate-100 hover:bg-slate-200 focus:ring-slate-300 dark:bg-slate-700 dark:hover:bg-slate-800 dark:focus:ring-slate-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-                    onClick={(e) => {
-                      onCancelItemSubmit({ itemId: item.id });
-                    }}
-                  >
-                    cancel
-                  </button>
-                </form>
+                </div>
               )}
             </li>
           ))}
-        {/* add a blue plus button to add a new item */}
-        {!activeItemUpdateId && (
-          <form onSubmit={handleSubmit(onUpdateItemSubmit)}>
-            <input {...register("name")} type="text" className="m-2" />
-            <input
-              {...register("listId")}
-              type="hidden"
-              defaultValue={list.id}
-            />
-            <input
-              type="submit"
-              value="add new item"
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-            ></input>
-          </form>
-        )}
       </ul>
+      <form onSubmit={handleSubmit(onUpdateItemSubmit)}>
+        <input {...register("name")} type="text" className="m-2" />
+        <input {...register("listId")} type="hidden" defaultValue={list.id} />
+        <input
+          type="submit"
+          value="add new item"
+          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+        />
+      </form>
+      {open && activeItem && (
+        <ItemUpdateDialog
+          open={open}
+          onClose={() => setOpen(false)}
+          onSubmit={onUpdateItemSubmit}
+          item={activeItem}
+          listId={list.id}
+        />
+      )}
     </>
+  );
+}
+function ItemUpdateDialog(props: {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: SubmitHandler<CheckListFormInput>;
+  item: Item;
+  listId: string;
+}) {
+  const { register, handleSubmit, reset } = useForm<CheckListFormInput>({
+    defaultValues: {
+      name: props.item.name,
+      listId: props.listId,
+      itemId: props.item.id,
+    },
+  });
+  const { trigger: triggerItemUpdate } = useSWRMutation("/api", updateItem);
+  useEffect(() => {
+    if (!props.open) {
+      reset();
+    }
+  }, [props.open, reset]);
+  const onSubmit: SubmitHandler<CheckListFormInput> = (data) => {
+    console.log(data);
+    reset();
+    triggerItemUpdate({ ...data });
+    props.onClose();
+  };
+
+  return (
+    <Dialog open={props.open} onOpenChange={props.onClose}>
+      <DialogContent className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-md">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold mb-4">
+            Edit Item
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Item Name
+            </label>
+            <input
+              type="text"
+              {...register("name")}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+          </div>
+          <input {...register("listId")} type="hidden" />
+          <input {...register("itemId")} type="hidden" />
+          <div className="flex justify-end gap-2">
+            <button
+              type="submit"
+              className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none dark:focus:ring-blue-800"
+            >
+              Update
+            </button>
+          </div>
+        </form>
+      </DialogContent>
+      <DialogClose />
+    </Dialog>
   );
 }
 
