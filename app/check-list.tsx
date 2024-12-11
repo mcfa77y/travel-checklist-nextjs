@@ -37,7 +37,7 @@ function CheckList(props: Props) {
   const [activeItemUpdateId, setActiveItemUpdateId] = useState<
     string | undefined
   >(undefined);
-  const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [mode, setMode] = useState<"update" | "read">("read");
   const [activeItem, setActiveItem] = useState<Item | undefined>(undefined);
   const [open, setOpen] = useState(false);
 
@@ -75,7 +75,18 @@ function CheckList(props: Props) {
 
   return (
     <>
-      <h2 className="m-2 text-xl underline-offset-3 underline ">{list.name}</h2>
+      <h2
+        className="m-2 text-xl underline-offset-3 underline cursor-pointer"
+        onClick={() => {
+          if (mode === "read") {
+            setMode("update");
+          } else {
+            setMode("read");
+          }
+        }}
+      >
+        {list.name}
+      </h2>
       <ul>
         {items
           .sort((a, b) => a.name.localeCompare(b.name))
@@ -89,7 +100,7 @@ function CheckList(props: Props) {
               >
                 {item.name}
               </span>
-              {item.id === activeItemUpdateId && (
+              {mode === "update" && item.id === activeItemUpdateId && (
                 <div>
                   <button
                     onClick={() => setOpen(true)}
@@ -101,7 +112,7 @@ function CheckList(props: Props) {
                     type="button"
                     className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
                     onClick={() => {
-                      triggerItemDelete({
+                      onDeleteItemSubmit({
                         name: item.name,
                         listId: list.id,
                         itemId: item.id,
@@ -115,15 +126,17 @@ function CheckList(props: Props) {
             </li>
           ))}
       </ul>
-      <form onSubmit={handleSubmit(onUpdateItemSubmit)}>
-        <input {...register("name")} type="text" className="m-2" />
-        <input {...register("listId")} type="hidden" defaultValue={list.id} />
-        <input
-          type="submit"
-          value="add new item"
-          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-        />
-      </form>
+      {mode === "update" && (
+        <form onSubmit={handleSubmit(onUpdateItemSubmit)}>
+          <input {...register("name")} type="text" className="m-2" />
+          <input {...register("listId")} type="hidden" defaultValue={list.id} />
+          <input
+            type="submit"
+            value="add new item"
+            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+          />
+        </form>
+      )}
       {open && activeItem && (
         <ItemUpdateDialog
           open={open}
