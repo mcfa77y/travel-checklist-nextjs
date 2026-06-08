@@ -61,10 +61,6 @@ function CheckList(props: Props) {
     triggerItemUpdate({ ...data });
     setOpen(false);
   };
-  const onCancelItemSubmit = () => {
-    reset();
-    setOpen(false);
-  };
 
   const onDeleteItemSubmit: SubmitHandler<CheckListFormInput> = (data) => {
     console.log(data);

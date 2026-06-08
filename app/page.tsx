@@ -19,7 +19,7 @@ export default function SidebarWithContent() {
   const [isOpen, setIsOpen] = useState(false);
   const [checkedItems, setCheckedItems] = useState<string[]>([]);
 
-  const { data, isLoading, error } = useSWR(
+  const { data } = useSWR(
     "/api",
     fetcher<{ lists: List[]; items: Item[] }>
   );

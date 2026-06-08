@@ -1,14 +1,15 @@
-import { Item, List, PrismaClient } from "@prisma/client";
+import { Item, PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { CheckListFormInput } from "../check-list";
+import { CheckListFormInput } from "@app/check-list";
+
 
 const prisma = new PrismaClient();
 
-export async function GET(): Promise<NextResponse<{ lists: List[]; items: Item[] }>> {
-  const lists = await prisma.list.findMany();
+export async function GET(): Promise<NextResponse<{ items: Item[] }>> {
   const items = await prisma.item.findMany();
-  return NextResponse.json({ lists, items });
+  return NextResponse.json({ items });
 }
+
 export async function POST(request: Request) {
   const body = (await request.json()) as CheckListFormInput;
   const code = body.name.toLocaleUpperCase().replace(/\s/g, "_");
