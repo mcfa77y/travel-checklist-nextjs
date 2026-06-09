@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { List, Item } from "@prisma/client";
-import { ArrowLeftIcon, PlusIcon, Trash2Icon, Loader2Icon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, Trash2Icon, Loader2Icon, PrinterIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
@@ -57,22 +57,31 @@ export default function EditListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-2xl bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8 print:bg-transparent print:py-0 print:px-0">
+      <div className="mx-auto max-w-2xl bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8 print:shadow-none print:border-none print:p-0 print:max-w-none">
         {/* Navigation Header */}
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 print:mb-4 print:pb-2">
           <div className="flex items-center space-x-4 flex-1">
-            <Link href="/">
+            <Link href="/" className="print:hidden">
               <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-500 hover:text-slate-800 hover:bg-slate-100">
                 <ArrowLeftIcon className="h-5 w-5" />
               </Button>
             </Link>
             <div className="flex-1">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Editing Checklist</p>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider print:hidden">Editing Checklist</p>
               <EditableListTitle list={list} onMutate={mutate} />
             </div>
           </div>
-          <div>
+          <div className="flex items-center space-x-2 print:hidden">
+            <Button
+              variant="outline"
+              size="default"
+              className="h-9 px-3"
+              onClick={() => window.print()}
+            >
+              <PrinterIcon className="h-4 w-4 mr-1.5" />
+              Print
+            </Button>
             <Button
               variant="outline"
               size="default"
@@ -87,9 +96,9 @@ export default function EditListPage() {
 
         {/* List Items Manager */}
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Checklist Items</h3>
+          <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider print:hidden">Checklist Items</h3>
           
-          <div className="bg-slate-50 rounded-lg p-4 border border-slate-100 divide-y divide-slate-200/60">
+          <div className="bg-slate-50 rounded-lg p-4 border border-slate-100 divide-y divide-slate-200/60 print:bg-transparent print:p-0 print:border-none">
             {list.items && list.items.length > 0 ? (
               list.items
                 .sort((a, b) => a.name.localeCompare(b.name))
@@ -102,12 +111,12 @@ export default function EditListPage() {
                   />
                 ))
             ) : (
-              <p className="text-center py-6 text-sm text-slate-400 italic">No items in this list yet.</p>
+              <p className="text-center py-6 text-sm text-slate-400 italic print:text-left print:py-2">No items in this list yet.</p>
             )}
           </div>
 
           {/* Add New Item */}
-          <div className="pt-2">
+          <div className="pt-2 print:hidden">
             <AddItemRow listId={list.id} onMutate={mutate} />
           </div>
         </div>
@@ -221,17 +230,18 @@ function EditableItemRow({
 
   return (
     <div className="flex items-center space-x-2 py-2 first:pt-0 last:pb-0">
+      <div className="hidden print:block border-2 border-slate-300 rounded-md w-4 h-4 flex-shrink-0 mr-1" />
       <input
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
         onBlur={handleBlur}
-        className="flex-1 px-2.5 py-1.5 border border-transparent rounded-md focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300 text-sm font-medium text-slate-800 bg-transparent hover:bg-slate-100/50 focus:bg-white transition"
+        className="flex-1 px-2.5 py-1.5 border border-transparent rounded-md focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300 text-sm font-medium text-slate-800 bg-transparent hover:bg-slate-100/50 focus:bg-white transition print:p-0 print:hover:bg-transparent"
       />
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50"
+        className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 print:hidden"
         onClick={handleDelete}
       >
         <Trash2Icon className="w-4 h-4" />
