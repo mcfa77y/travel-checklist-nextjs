@@ -121,9 +121,9 @@ export default function SidebarWithContent() {
           onDeleteList={handleDeleteList}
         />
       </aside>
-      <main className="flex flex-col p-6 gap-4 bg-slate-300 flex-1 overflow-auto print:bg-transparent print:p-0 print:gap-6 print:overflow-visible max-w-4xl w-full mx-auto">
+      <main className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 p-6 bg-slate-300 flex-1 overflow-auto print:bg-transparent print:p-0 print:overflow-visible max-w-7xl w-full mx-auto">
         {checkedItems.map((id) => (
-          <div key={id}>
+          <div key={id} className="break-inside-avoid mb-6">
             <CheckList
               list={data.lists.find((item) => item.id === id)!}
               items={items.filter((item) => item.listId === id)}
