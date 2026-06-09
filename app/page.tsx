@@ -4,6 +4,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Item, List } from "@prisma/client";
 import { LayoutDashboardIcon, MenuIcon } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import CheckList from "@app/check-list";
@@ -25,6 +26,7 @@ async function createListFetcher(url: string, { arg }: { arg: { name: string } }
     body: JSON.stringify(arg),
   });
   if (!res.ok) throw new Error("Failed to create list");
+  return res.json() as Promise<{ id: string; name: string }>;
 }
 
 async function deleteListFetcher(url: string, { arg }: { arg: { id: string } }) {
@@ -37,6 +39,7 @@ async function deleteListFetcher(url: string, { arg }: { arg: { id: string } }) 
 export default function SidebarWithContent() {
   const [isOpen, setIsOpen] = useState(false);
   const [checkedItems, setCheckedItems] = useState<string[]>([]);
+  const router = useRouter();
 
   const { data } = useSWR(
     "/api",
@@ -47,7 +50,10 @@ export default function SidebarWithContent() {
   const { trigger: triggerDeleteList } = useSWRMutation("/api", deleteListFetcher);
 
   const handleCreateList = async (name: string) => {
-    await triggerCreateList({ name });
+    const newList = await triggerCreateList({ name });
+    if (newList && newList.id) {
+      router.push(`/list/${newList.id}`);
+    }
   };
 
   const handleDeleteList = async (id: string) => {

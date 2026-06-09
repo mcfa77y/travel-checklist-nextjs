@@ -13,12 +13,12 @@ export async function POST(request: Request) {
   const code = body.name.toLocaleUpperCase().replace(/\s/g, "_");
   console.log("POST", JSON.stringify({ body, code }, null, 2));
 
-  await prisma.list.create({
+  const list = await prisma.list.create({
     data: {
       name: body.name,
       code: code,
     }
   });
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json(list);
 }
