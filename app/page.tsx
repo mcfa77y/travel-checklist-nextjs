@@ -27,17 +27,6 @@ async function createListFetcher(url: string, { arg }: { arg: { name: string } }
   if (!res.ok) throw new Error("Failed to create list");
 }
 
-async function updateListFetcher(url: string, { arg }: { arg: { id: string; name: string } }) {
-  const res = await fetch(`/api/list/${arg.id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name: arg.name }),
-  });
-  if (!res.ok) throw new Error("Failed to update list");
-}
-
 async function deleteListFetcher(url: string, { arg }: { arg: { id: string } }) {
   const res = await fetch(`/api/list/${arg.id}`, {
     method: "DELETE",
@@ -55,15 +44,10 @@ export default function SidebarWithContent() {
   );
 
   const { trigger: triggerCreateList } = useSWRMutation("/api", createListFetcher);
-  const { trigger: triggerUpdateList } = useSWRMutation("/api", updateListFetcher);
   const { trigger: triggerDeleteList } = useSWRMutation("/api", deleteListFetcher);
 
   const handleCreateList = async (name: string) => {
     await triggerCreateList({ name });
-  };
-
-  const handleUpdateList = async (id: string, name: string) => {
-    await triggerUpdateList({ id, name });
   };
 
   const handleDeleteList = async (id: string) => {
@@ -105,7 +89,6 @@ export default function SidebarWithContent() {
             checkedItems={checkedItems}
             onCheckboxChange={handleCheckboxChange}
             onCreateList={handleCreateList}
-            onUpdateList={handleUpdateList}
             onDeleteList={handleDeleteList}
           />
         </SheetContent>
@@ -116,7 +99,6 @@ export default function SidebarWithContent() {
           checkedItems={checkedItems}
           onCheckboxChange={handleCheckboxChange}
           onCreateList={handleCreateList}
-          onUpdateList={handleUpdateList}
           onDeleteList={handleDeleteList}
         />
       </aside>

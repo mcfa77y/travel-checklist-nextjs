@@ -1,4 +1,4 @@
-import { List, PrismaClient } from "@prisma/client";
+import { List, Item, PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
@@ -6,11 +6,12 @@ const prisma = new PrismaClient();
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
-): Promise<NextResponse<List | null>> {
+): Promise<NextResponse<(List & { items: Item[] }) | null>> {
   const { id } = await params;
   console.log(`GET list ${id} from ${request.url}`);
   const list = await prisma.list.findUnique({
-    where: { id: id }
+    where: { id: id },
+    include: { items: true }
   });
   return NextResponse.json(list);
 }
