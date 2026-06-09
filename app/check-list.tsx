@@ -16,7 +16,7 @@ function CheckList(props: Props) {
   const { list, items } = props;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 min-w-[280px] max-w-sm print:shadow-none print:border-slate-300 print:break-inside-avoid print:bg-transparent">
+    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 w-full print:shadow-none print:border-slate-300 print:break-inside-avoid print:bg-transparent">
       <h2 className="m-2 text-lg font-bold text-slate-800 border-b pb-2">
         {list.name}
       </h2>
