@@ -4,19 +4,35 @@ import { Button } from "@/components/ui/button";
 import { List, Item } from "@prisma/client";
 import { ArrowLeftIcon, PlusIcon, Trash2Icon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
 import { fetcher } from "@app/shared";
 
 export default function EditListPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params?.id as string;
 
   const { data: list, error, mutate, isLoading } = useSWR<List & { items: Item[] }>(
     id ? `/api/list/${id}` : null,
     fetcher
   );
+
+  const handleDeleteList = async () => {
+    if (!list) return;
+    if (confirm(`Are you sure you want to delete the checklist "${list.name || "No name"}"?`)) {
+      try {
+        const response = await fetch(`/api/list/${list.id}`, {
+          method: "DELETE",
+        });
+        if (!response.ok) throw new Error("Failed to delete checklist");
+        router.push("/");
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -44,15 +60,28 @@ export default function EditListPage() {
     <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-2xl bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
         {/* Navigation Header */}
-        <div className="flex items-center space-x-4 mb-6 pb-4 border-b border-slate-100">
-          <Link href="/">
-            <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-500 hover:text-slate-800 hover:bg-slate-100">
-              <ArrowLeftIcon className="h-5 w-5" />
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+          <div className="flex items-center space-x-4 flex-1">
+            <Link href="/">
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-500 hover:text-slate-800 hover:bg-slate-100">
+                <ArrowLeftIcon className="h-5 w-5" />
+              </Button>
+            </Link>
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Editing Checklist</p>
+              <EditableListTitle list={list} onMutate={mutate} />
+            </div>
+          </div>
+          <div>
+            <Button
+              variant="outline"
+              size="default"
+              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 h-9 px-3"
+              onClick={handleDeleteList}
+            >
+              <Trash2Icon className="h-4 w-4 mr-1.5" />
+              Delete List
             </Button>
-          </Link>
-          <div className="flex-1">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Editing Checklist</p>
-            <EditableListTitle list={list} onMutate={mutate} />
           </div>
         </div>
 
