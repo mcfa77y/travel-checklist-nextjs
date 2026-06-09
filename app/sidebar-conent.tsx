@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { UserCircle2Icon, PlusIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { UserCircle2Icon, PlusIcon, PencilIcon, Trash2Icon, PrinterIcon } from "lucide-react";
 import { NavItem } from "@app/page";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -84,7 +84,16 @@ export function SidebarContent({
           ))}
         </nav>
       </ScrollArea>
-      <div className="p-4 border-t">
+      <div className="p-4 border-t flex flex-col gap-2 print:hidden">
+        <Button
+          variant="outline"
+          className="justify-start w-full"
+          onClick={() => window.print()}
+          disabled={checkedItems.length === 0}
+        >
+          <PrinterIcon className="w-4 h-4 mr-2" />
+          Print Selected ({checkedItems.length})
+        </Button>
         <Button variant="ghost" className="justify-start w-full">
           <UserCircle2Icon className="w-4 h-4 mr-2" />
           Profile

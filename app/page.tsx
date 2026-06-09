@@ -78,18 +78,18 @@ export default function SidebarWithContent() {
   }
   const items: Item[] = data.items;
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen print:h-auto print:block">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button
             variant="outline"
             size="icon"
-            className="absolute md:hidden top-4 left-4"
+            className="absolute md:hidden top-4 left-4 print:hidden"
           >
             <MenuIcon className="w-4 h-4" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[240px] sm:w-[300px] p-0">
+        <SheetContent side="left" className="w-[240px] sm:w-[300px] p-0 print:hidden">
           <SidebarContent
             navItems={lists}
             checkedItems={checkedItems}
@@ -99,7 +99,7 @@ export default function SidebarWithContent() {
           />
         </SheetContent>
       </Sheet>
-      <aside className="hidden md:flex h-screen w-[240px] flex-col border-r">
+      <aside className="hidden md:flex h-screen w-[240px] flex-col border-r print:hidden">
         <SidebarContent
           navItems={lists}
           checkedItems={checkedItems}
@@ -108,7 +108,7 @@ export default function SidebarWithContent() {
           onDeleteList={handleDeleteList}
         />
       </aside>
-      <main className="flex flex-row flex-wrap p-6 gap-3 bg-slate-300">
+      <main className="flex flex-row flex-wrap p-6 gap-3 bg-slate-300 flex-1 overflow-auto print:bg-transparent print:p-0 print:gap-6 print:overflow-visible">
         {checkedItems.map((id) => (
           <div key={id}>
             <CheckList
@@ -117,7 +117,7 @@ export default function SidebarWithContent() {
             />
           </div>
         ))}
-        {checkedItems.length === 0 && <p>No items checked</p>}
+        {checkedItems.length === 0 && <p className="print:hidden">No items checked</p>}
       </main>
     </div>
   );
