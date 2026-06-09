@@ -121,7 +121,7 @@ export default function SidebarWithContent() {
           onDeleteList={handleDeleteList}
         />
       </aside>
-      <main className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 p-6 bg-slate-300 flex-1 overflow-auto print:bg-transparent print:p-0 print:overflow-visible print:columns-3 print:gap-8 max-w-7xl w-full mx-auto">
+      <main className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 p-6 bg-slate-300 flex-1 overflow-auto print:bg-transparent print:p-0 print:overflow-visible print:columns-3 print:gap-8 max-w-7xl w-full mx-auto" style={{ background: "linear-gradient(135deg, rgb(16, 35, 198), rgb(198, 88, 16))" }}>
         {checkedItems.map((id) => (
           <div key={id} className="break-inside-avoid mb-6">
             <CheckList
