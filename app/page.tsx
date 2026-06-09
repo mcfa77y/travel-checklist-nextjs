@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Item, List } from "@prisma/client";
 import { LayoutDashboardIcon, MenuIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
@@ -39,12 +39,25 @@ async function deleteListFetcher(url: string, { arg }: { arg: { id: string } }) 
 export default function SidebarWithContent() {
   const [isOpen, setIsOpen] = useState(false);
   const [checkedItems, setCheckedItems] = useState<string[]>([]);
+  const [hasInitializedDefault, setHasInitializedDefault] = useState(false);
   const router = useRouter();
 
   const { data } = useSWR(
     "/api",
     fetcher<{ lists: List[]; items: Item[] }>
   );
+
+  useEffect(() => {
+    if (data?.lists && !hasInitializedDefault) {
+      const baseTravelList = data.lists.find(
+        (list: List) => list.name?.toLowerCase() === "base travel" || list.code === "BASE_TRAVEL"
+      );
+      if (baseTravelList) {
+        setCheckedItems([baseTravelList.id]);
+      }
+      setHasInitializedDefault(true);
+    }
+  }, [data, hasInitializedDefault]);
 
   const { trigger: triggerCreateList } = useSWRMutation("/api", createListFetcher);
   const { trigger: triggerDeleteList } = useSWRMutation("/api", deleteListFetcher);
