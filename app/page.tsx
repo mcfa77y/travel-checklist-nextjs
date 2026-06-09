@@ -5,14 +5,44 @@ import { Item, List } from "@prisma/client";
 import { LayoutDashboardIcon, MenuIcon } from "lucide-react";
 import { useState } from "react";
 import useSWR from "swr";
-import CheckList from "./check-list";
-import { fetcher } from "./shared";
-import { SidebarContent } from "./sidebar-conent";
+import useSWRMutation from "swr/mutation";
+import CheckList from "@app/check-list";
+import { fetcher } from "@app/shared";
+import { SidebarContent } from "@app/sidebar-conent";
 
 export interface NavItem {
   id: string;
   title: string;
   icon: React.ReactNode;
+}
+
+async function createListFetcher(url: string, { arg }: { arg: { name: string } }) {
+  const res = await fetch("/api/list", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(arg),
+  });
+  if (!res.ok) throw new Error("Failed to create list");
+}
+
+async function updateListFetcher(url: string, { arg }: { arg: { id: string; name: string } }) {
+  const res = await fetch(`/api/list/${arg.id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name: arg.name }),
+  });
+  if (!res.ok) throw new Error("Failed to update list");
+}
+
+async function deleteListFetcher(url: string, { arg }: { arg: { id: string } }) {
+  const res = await fetch(`/api/list/${arg.id}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete list");
 }
 
 export default function SidebarWithContent() {
@@ -23,6 +53,23 @@ export default function SidebarWithContent() {
     "/api",
     fetcher<{ lists: List[]; items: Item[] }>
   );
+
+  const { trigger: triggerCreateList } = useSWRMutation("/api", createListFetcher);
+  const { trigger: triggerUpdateList } = useSWRMutation("/api", updateListFetcher);
+  const { trigger: triggerDeleteList } = useSWRMutation("/api", deleteListFetcher);
+
+  const handleCreateList = async (name: string) => {
+    await triggerCreateList({ name });
+  };
+
+  const handleUpdateList = async (id: string, name: string) => {
+    await triggerUpdateList({ id, name });
+  };
+
+  const handleDeleteList = async (id: string) => {
+    await triggerDeleteList({ id });
+    setCheckedItems((prev) => prev.filter((item) => item !== id));
+  };
 
   const handleCheckboxChange = (id: string) => {
     setCheckedItems((prev) =>
@@ -57,6 +104,9 @@ export default function SidebarWithContent() {
             navItems={lists}
             checkedItems={checkedItems}
             onCheckboxChange={handleCheckboxChange}
+            onCreateList={handleCreateList}
+            onUpdateList={handleUpdateList}
+            onDeleteList={handleDeleteList}
           />
         </SheetContent>
       </Sheet>
@@ -65,6 +115,9 @@ export default function SidebarWithContent() {
           navItems={lists}
           checkedItems={checkedItems}
           onCheckboxChange={handleCheckboxChange}
+          onCreateList={handleCreateList}
+          onUpdateList={handleUpdateList}
+          onDeleteList={handleDeleteList}
         />
       </aside>
       <main className="flex flex-row flex-wrap p-6 gap-3 bg-slate-300">

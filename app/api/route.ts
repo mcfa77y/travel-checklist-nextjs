@@ -1,6 +1,6 @@
 import { Item, List, PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { CheckListFormInput } from "../check-list";
+import { CheckListFormInput } from "@app/check-list";
 
 const prisma = new PrismaClient();
 

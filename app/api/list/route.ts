@@ -1,6 +1,5 @@
 import { List, PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { CheckListFormInput } from "@app/check-list";
 
 const prisma = new PrismaClient();
 
@@ -19,18 +18,6 @@ export async function POST(request: Request) {
       name: body.name,
       code: code,
     }
-  });
-
-  return NextResponse.json({ success: true });
-}
-
-export async function DELETE(request: Request) {
-  const body = (await request.json()) as CheckListFormInput;
-  console.log("DELETE", JSON.stringify({ body }, null, 2));
-  await prisma.item.delete({
-    where: {
-      id: body.itemId ?? "",
-    },
   });
 
   return NextResponse.json({ success: true });

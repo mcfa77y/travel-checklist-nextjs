@@ -1,6 +1,5 @@
 import { List, PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { CheckListFormInput } from "@app/check-list";
 
 const prisma = new PrismaClient();
 
@@ -19,21 +18,16 @@ export async function PATCH(request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const body = (await request.json()) as CheckListFormInput;
+  const body = (await request.json()) as { name: string };
 
   const code = body.name.toLocaleUpperCase().replace(/\s/g, "_");
-  console.log("PATCH", id, JSON.stringify({ body, code }, null, 2));
+  console.log("PATCH list", id, JSON.stringify({ body, code }, null, 2));
 
-  await prisma.item.upsert({
+  await prisma.list.update({
     where: {
-      id: body.itemId ?? "",
+      id: id,
     },
-    create: {
-      name: body.name,
-      code: code,
-      listId: body.listId,
-    },
-    update: {
+    data: {
       name: body.name,
       code: code,
     },
